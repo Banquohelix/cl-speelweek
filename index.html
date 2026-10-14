@@ -1,0 +1,441 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>CL Speelweek</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="Live Champions League-uitslagen, standen en wedstrijdverloop voor de Nederlandse fan.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Saira+Extra+Condensed:wght@600;800&family=Public+Sans:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: the masthead IS the Dutch flag (red band = name + switches, white band = tagline, blue band = tabs); one centred column of match rows below; oranje marks Dutch clubs.
+   Modes: "Dag" (white page, blue ink, red accents) and "Nacht" (deep Dutch-blue page, white ink, bright red accents). The page's own Licht/Donker/Auto switch sets .nl-light / .nl-dark on <html>; Auto follows the system/viewer. */
+:root{
+  --rood:#AE1C28; --blauw:#21468B; --wit:#FFFFFF; --oranje:#F36C21;
+  --flag-r:#AE1C28; --flag-w:#FFFFFF; --flag-b:#21468B; --flag-w-fg:#21468B; --flag-edge:#E3E7EF;
+  --bg:#F5F7FB; --surface:#FFFFFF; --fg:#13204A; --muted:#58648A; --line:#DCE2EE;
+  --score:#21468B; --link:#21468B; --accent:#AE1C28; --live:#AE1C28; --win:#1A7F45; --chip:#E9EEF8;
+  --zone-top:#21468B; --zone-mid:#9AAED6; --zone-out:#D4D9E4; --nav-hover:#AE1C28;
+  --f-display:"Saira Extra Condensed","Arial Narrow",system-ui,sans-serif;
+  --f-body:"Public Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]):not(.nl-light){
+  --flag-r:#9E1520; --flag-w:#EEF1F7; --flag-b:#152E66; --flag-w-fg:#152E66; --flag-edge:#0A1430;
+  --bg:#0A1430; --surface:#122150; --fg:#F2F5FB; --muted:#A6B3D2; --line:#22376E;
+  --score:#FFFFFF; --link:#A9C2F5; --accent:#FF4655; --live:#FF4655; --win:#4CC27F; --chip:#1A2D63;
+  --zone-top:#8AAAF0; --zone-mid:#4560A3; --zone-out:#2A3B70; --nav-hover:#FF4655;
+  color-scheme:dark}}
+:root[data-theme="dark"]:not(.nl-light),:root.nl-dark{
+  --flag-r:#9E1520; --flag-w:#EEF1F7; --flag-b:#152E66; --flag-w-fg:#152E66; --flag-edge:#0A1430;
+  --bg:#0A1430; --surface:#122150; --fg:#F2F5FB; --muted:#A6B3D2; --line:#22376E;
+  --score:#FFFFFF; --link:#A9C2F5; --accent:#FF4655; --live:#FF4655; --win:#4CC27F; --chip:#1A2D63;
+  --zone-top:#8AAAF0; --zone-mid:#4560A3; --zone-out:#2A3B70; --nav-hover:#FF4655;
+  color-scheme:dark}
+:root.nl-light{color-scheme:light}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--f-body);font-size:15px;line-height:1.45}
+button{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--oranje);outline-offset:2px}
+
+/* Masthead */
+.band .in{max-width:880px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.band.r{background:var(--flag-r);color:#fff}
+.band.r .in{padding-block:18px 14px;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px}
+.band.w{background:var(--flag-w);color:var(--flag-w-fg);border-bottom:1px solid var(--flag-edge)}
+.band.w .in{padding-block:9px}
+.band.b{background:var(--flag-b);color:#fff}
+.brand h1{margin:0;font-family:var(--f-display);font-weight:800;font-size:clamp(2.2rem,7.5vw,3.3rem);line-height:.88;letter-spacing:.01em;text-transform:uppercase}
+.brand h1 small{display:block;font-size:.34em;letter-spacing:.32em;font-weight:600;opacity:.85;margin-bottom:4px}
+.band.w p{margin:0;font-size:.82rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase}
+.switches{display:flex;flex-wrap:wrap;gap:8px}
+.seg{display:inline-flex;border:1.5px solid rgba(255,255,255,.6);border-radius:999px;overflow:hidden}
+.seg button{background:transparent;border:0;padding:6px 12px;font-weight:700;font-size:.78rem;letter-spacing:.06em;cursor:pointer;color:#fff;display:inline-flex;align-items:center;gap:5px}
+.seg button[aria-pressed="true"]{background:#fff;color:#AE1C28}
+.seg svg{width:13px;height:13px;flex:none}
+
+/* Tabs + toolbar */
+.wrap{max-width:880px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 48px}
+.tabs{display:flex;gap:4px}
+.tabs button{background:none;border:0;padding:10px 14px 9px;font-family:var(--f-display);font-size:1.3rem;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:rgba(255,255,255,.68);cursor:pointer;border-bottom:4px solid transparent}
+.tabs button:hover{color:#fff}
+.tabs button[aria-selected="true"]{color:#fff;border-color:var(--oranje)}
+.bar{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin:16px 0 8px}
+.daynav{display:flex;align-items:center;gap:6px;flex:1 1 280px;min-width:0}
+.navbtn{width:38px;height:38px;border-radius:50%;border:1.5px solid var(--line);background:var(--surface);cursor:pointer;font-size:1.3rem;line-height:1;display:grid;place-items:center;flex:none}
+.navbtn:hover{border-color:var(--nav-hover);color:var(--nav-hover)}
+.day{min-width:0;padding:0 6px}
+.day b{display:block;font-family:var(--f-display);font-size:1.45rem;font-weight:800;text-transform:uppercase;letter-spacing:.02em;line-height:1.05;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.day small{color:var(--muted);font-size:.78rem;letter-spacing:.03em}
+.tools{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.pill{border:1.5px solid var(--line);background:var(--surface);border-radius:999px;padding:6px 12px;font-size:.8rem;font-weight:600;cursor:pointer}
+.pill[aria-pressed="true"]{border-color:var(--oranje);background:var(--oranje);color:#fff}
+.status{font-size:.76rem;color:var(--muted);display:flex;align-items:center;gap:6px}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--muted)}
+.dot.ok{background:var(--win)}.dot.live{background:var(--live);animation:pulse 1.4s infinite}
+@keyframes pulse{50%{opacity:.3}}
+@media (prefers-reduced-motion:reduce){.dot.live,.live-badge::before{animation:none}}
+.note{margin:6px 0 10px;padding:10px 12px;border-radius:8px;background:var(--chip);font-size:.84rem;color:var(--muted)}
+
+/* Match list */
+.group-h{display:flex;align-items:center;gap:10px;margin:22px 0 8px;font-size:.74rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.group-h::after{content:"";flex:1;height:1px;background:var(--line)}
+.group-h.nl{color:var(--oranje)}
+.list{display:grid;gap:8px}
+.match{background:var(--surface);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.match.nl{border-left:4px solid var(--oranje)}
+.mrow{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:10px;padding:12px 14px;width:100%;background:none;border:0;cursor:pointer;text-align:left}
+.team{display:flex;align-items:center;gap:10px;min-width:0}
+.team.away{flex-direction:row-reverse;text-align:right}
+.team .nm{font-weight:600;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.team .form{display:block;font-size:.68rem;color:var(--muted);letter-spacing:.14em;font-weight:500}
+.team.lost .nm{color:var(--muted);font-weight:500}
+.crest{width:32px;height:32px;flex:none;display:grid;place-items:center;border-radius:50%;background:var(--chip);font-size:.62rem;font-weight:800;color:var(--muted);overflow:hidden}
+.crest img{width:100%;height:100%;object-fit:contain}
+.nlflag{display:inline-block;margin-left:6px;font-size:.6rem;font-weight:800;padding:1px 5px;border-radius:3px;background:var(--oranje);color:#fff;vertical-align:2px;letter-spacing:.06em}
+.mid{text-align:center;min-width:86px}
+.score{font-family:var(--f-display);font-weight:800;font-size:1.9rem;line-height:1;font-variant-numeric:tabular-nums;letter-spacing:.04em;color:var(--score)}
+.ko{font-family:var(--f-display);font-weight:800;font-size:1.5rem;line-height:1;font-variant-numeric:tabular-nums;color:var(--score)}
+.day b{color:var(--score)}
+.match:hover{border-color:var(--zone-mid)}
+.st{display:block;font-size:.7rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-top:4px}
+.live-badge{color:var(--live)}
+.live-badge::before{content:"";display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--live);margin-right:5px;vertical-align:1px;animation:pulse 1.4s infinite}
+.detail{border-top:1px solid var(--line);padding:12px 14px 14px;font-size:.86rem}
+.ev{display:grid;grid-template-columns:1fr 46px 1fr;gap:8px;padding:3px 0;align-items:center}
+.ev .min{text-align:center;font-weight:700;font-variant-numeric:tabular-nums;color:var(--muted);font-size:.78rem}
+.ev .r{text-align:left}.ev .l{text-align:right}
+.ic{display:inline-block;width:10px;height:13px;border-radius:2px;vertical-align:-1px;margin:0 5px}
+.ic.y{background:#F2C200}.ic.rd{background:var(--rood)}
+.ic.g{width:auto;height:auto;font-size:.8rem}
+.meta{display:flex;flex-wrap:wrap;gap:6px 16px;margin-top:10px;color:var(--muted);font-size:.8rem}
+.meta a{color:var(--link);font-weight:600}
+.empty{padding:40px 16px;text-align:center;color:var(--muted)}
+
+/* Standings */
+.tbl-wrap{overflow-x:auto;background:var(--surface);border:1px solid var(--line);border-radius:10px;margin-top:14px}
+table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums;font-size:.86rem}
+th,td{padding:8px 8px;text-align:right;white-space:nowrap}
+th{font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--line);font-weight:700}
+td.t,th.t{text-align:left}
+td.t{display:flex;align-items:center;gap:8px}
+td.t .crest{width:22px;height:22px}
+tr+tr td{border-top:1px solid var(--line)}
+td.pos{position:relative;padding-left:14px;font-weight:700}
+td.pos::before{content:"";position:absolute;left:0;top:4px;bottom:4px;width:4px;border-radius:0 2px 2px 0;background:var(--zone-out)}
+tr.z1 td.pos::before{background:var(--zone-top)}tr.z2 td.pos::before{background:var(--zone-mid)}
+tr.nl{background:color-mix(in srgb,var(--oranje) 10%,transparent)}
+td.pts{font-weight:800}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;margin-top:10px;font-size:.78rem;color:var(--muted)}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:6px;vertical-align:-1px}
+footer{margin-top:32px;font-size:.74rem;color:var(--muted)}
+@media (max-width:520px){.team .nm{font-size:.9rem}.crest{width:26px;height:26px}.mrow{padding:10px;gap:6px}.mid{min-width:68px}.score{font-size:1.6rem}.hide-sm{display:none}}
+</style>
+</head>
+<body>
+
+<header class="mast">
+  <div class="band r"><div class="in">
+    <div class="brand"><h1><small>UEFA Champions League</small>CL Speelweek</h1></div>
+    <div class="switches">
+      <div class="seg" role="group" aria-label="Taal / Language">
+        <button id="lang-nl" type="button">NL</button>
+        <button id="lang-en" type="button">EN</button>
+      </div>
+      <div class="seg" role="group" id="modegrp">
+        <button id="mode-light" type="button"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="3.2" fill="currentColor"/><g stroke="currentColor" stroke-width="1.5" stroke-linecap="round" fill="none"><path d="M8 1v1.8M8 13.2V15M1 8h1.8M13.2 8H15M3 3l1.3 1.3M11.7 11.7 13 13M3 13l1.3-1.3M11.7 4.3 13 3"/></g></svg><span></span></button>
+        <button id="mode-dark" type="button"><svg viewBox="0 0 16 16" aria-hidden="true"><path fill="currentColor" d="M10.8 1.2A6.9 6.9 0 1 0 14.8 11 5.6 5.6 0 0 1 10.8 1.2Z"/></svg><span></span></button>
+        <button id="mode-auto" type="button"><span></span></button>
+      </div>
+    </div>
+  </div></div>
+  <div class="band w"><div class="in"><p id="tagline"></p></div></div>
+  <div class="band b"><div class="in">
+    <div class="tabs" role="tablist">
+      <button id="tab-m" role="tab" type="button" aria-selected="true"></button>
+      <button id="tab-s" role="tab" type="button" aria-selected="false"></button>
+    </div>
+  </div></div>
+</header>
+
+<main class="wrap">
+
+  <section id="view-m">
+    <div class="bar">
+      <div class="daynav">
+        <button class="navbtn" id="prev" type="button">‹</button>
+        <div class="day"><b id="dayname">…</b><small id="daysub"></small></div>
+        <button class="navbtn" id="next" type="button">›</button>
+      </div>
+      <div class="tools">
+        <button class="pill" id="nlonly" type="button" aria-pressed="false"></button>
+        <button class="pill" id="refresh" type="button"></button>
+        <span class="status"><span class="dot" id="dot"></span><span id="stxt"></span></span>
+      </div>
+    </div>
+    <div id="note" class="note" hidden></div>
+    <div id="matches"></div>
+  </section>
+
+  <section id="view-s" hidden>
+    <div id="snote" class="note" hidden></div>
+    <div id="standings"></div>
+  </section>
+
+  <footer id="foot"></footer>
+</main>
+
+<script>
+(function(){
+const API="https://site.api.espn.com/apis/site/v2/sports/soccer/uefa.champions/scoreboard";
+const STAND="https://site.api.espn.com/apis/v2/sports/soccer/uefa.champions/standings";
+const TZ="Europe/Amsterdam";
+const NL_CLUBS=/\b(PSV|Feyenoord|Ajax|AZ\b|AZ Alkmaar|Twente|Utrecht|Go Ahead|NEC|Heerenveen|Sparta Rotterdam|Vitesse)/i;
+
+const T={
+ nl:{tag:"Champions League · uitslagen & programma voor de Nederlandse fan",tabM:"Wedstrijden",tabS:"Stand",nlonly:"Alleen NL-clubs",refresh:"Vernieuwen",
+   connecting:"Verbinden…",updated:"Bijgewerkt",live:"Live",livenow:"live",loading:"Laden…",nomatch:"Geen wedstrijden op deze dag.",nomatchNL:"Geen Nederlandse clubs in actie op deze dag.",
+   ft:"Afgelopen",ht:"Rust",aet:"Na verl.",pens:"Na pen.",post:"Uitgesteld",sched:"Aftrap",nlgroup:"Nederlandse clubs",timesNL:"Tijden in Nederlandse tijd",
+   kickoff:"Aftrap",venue:"Stadion",espn:"Wedstrijdcentrum op ESPN",noev:"Nog geen doelpunten of kaarten.",
+   snap:"Je bekijkt een voorbeeld (opgeslagen gegevens van woensdag 14 oktober). Op je eigen site, bijvoorbeeld op Netlify, laden live uitslagen automatisch.",
+   snapS:"De stand laadt live zodra de site op je eigen domein draait (bijvoorbeeld Netlify).",
+   err:"Kon geen live gegevens ophalen. Controleer je verbinding en probeer opnieuw.",
+   pos:"#",club:"Club",gp:"G",w:"W",d:"G",l:"V",gd:"DS",pts:"Pnt",
+   z1:"1–8: direct naar achtste finales",z2:"9–24: tussenronde",z3:"25–36: uitgeschakeld",
+   foot:"Gegevens: ESPN. Geen officiële UEFA-site.",match:"wedstrijden",matchOne:"wedstrijd",nextMd:"Volgende speeldag",
+   y:"Gele kaart",r:"Rode kaart",og:"e.d.",pen:"pen.",mLight:"Licht",mDark:"Donker",mAuto:"Auto",mGroup:"Weergave"},
+ en:{tag:"Champions League · scores & fixtures for the Dutch fan",tabM:"Matches",tabS:"Table",nlonly:"Dutch clubs only",refresh:"Refresh",
+   connecting:"Connecting…",updated:"Updated",live:"Live",livenow:"live",loading:"Loading…",nomatch:"No matches on this day.",nomatchNL:"No Dutch clubs in action on this day.",
+   ft:"Full time",ht:"Half time",aet:"After ET",pens:"On pens",post:"Postponed",sched:"Kick-off",nlgroup:"Dutch clubs",timesNL:"Times in Dutch time (CET/CEST)",
+   kickoff:"Kick-off",venue:"Stadium",espn:"Match centre on ESPN",noev:"No goals or cards yet.",
+   snap:"You're viewing a preview (saved data from Wednesday 14 October). On your own site, such as Netlify, live scores load automatically.",
+   snapS:"The table loads live once the site runs on your own domain (such as Netlify).",
+   err:"Couldn't load live data. Check your connection and try again.",
+   pos:"#",club:"Club",gp:"P",w:"W",d:"D",l:"L",gd:"GD",pts:"Pts",
+   z1:"1–8: straight to round of 16",z2:"9–24: knockout play-offs",z3:"25–36: eliminated",
+   foot:"Data: ESPN. Not an official UEFA site.",match:"matches",matchOne:"match",nextMd:"Next matchday",
+   y:"Yellow card",r:"Red card",og:"o.g.",pen:"pen.",mLight:"Light",mDark:"Dark",mAuto:"Auto",mGroup:"Appearance"}
+};
+
+// Saved snapshot used when the live feed is unreachable (e.g. inside a preview sandbox)
+const SNAP_DATE="2026-10-14";
+const SNAP=[
+ ["401915416","2026-10-14T16:45Z","Feyenoord","FEY","142","DWDWW","Como","COMO","2572","WWDWW","De Kuip","Rotterdam"],
+ ["401915415","2026-10-14T16:45Z","LASK Linz","LAS","4411","WWWLW","Liverpool","LIV","364","WDDDL","Raiffeisen Arena","Linz"],
+ ["401915414","2026-10-14T19:00Z","AS Roma","ROMA","104","WWWWW","Real Madrid","RMA","86","LWWWW","Stadio Olimpico","Roma"],
+ ["401915409","2026-10-14T19:00Z","Aston Villa","AVL","362","LLLWW","Fenerbahçe","FEN","436","WWWDL","Villa Park","Birmingham"],
+ ["401915393","2026-10-14T19:00Z","Bodø/Glimt","BODO","2980","WWWWW","Borussia Dortmund","DOR","124","WWLLW","Aspmyra Stadion","Bodø"],
+ ["401915407","2026-10-14T19:00Z","Manchester City","MNC","382","WWLLD","Paris Saint-Germain","PSG","160","LDDLW","Etihad Stadium","Manchester"],
+ ["401915408","2026-10-14T19:00Z","Real Betis","BET","244","WLWWW","FC Porto","FCP","437","WWWWW","Estadio La Cartuja","Sevilla"],
+ ["401915406","2026-10-14T19:00Z","Shakhtar Donetsk","SHK","493","LLDWL","AEK Athens","AEK","887","DWWDD","Stamford Bridge","London"],
+ ["401915405","2026-10-14T19:00Z","Slovan Bratislava","SLB","521","WDWWD","VfB Stuttgart","VFB","134","WLWLD","Národný futbalový štadión","Bratislava"]
+].map(r=>({id:r[0],date:r[1],competitions:[{venue:{fullName:r[10],address:{city:r[11]}},details:[],status:{type:{state:"pre",name:"STATUS_SCHEDULED"}},
+  competitors:[{homeAway:"home",score:"0",form:r[5],team:{id:r[4],displayName:r[2],abbreviation:r[3]}},{homeAway:"away",score:"0",form:r[9],team:{id:r[8],displayName:r[6],abbreviation:r[7]}}]}],
+  links:[{href:"https://www.espn.com/soccer/match/_/gameId/"+r[0]}]}));
+
+const S={lang:"nl",mode:"auto",day:null,nlOnly:false,open:new Set(),events:[],snapshot:false,timer:null,tab:"m",standings:null};
+try{const v=localStorage.getItem("clsw-lang");if(v==="en"||v==="nl")S.lang=v;S.nlOnly=localStorage.getItem("clsw-nl")==="1";
+  const m=localStorage.getItem("clsw-mode");if(m==="light"||m==="dark"||m==="auto")S.mode=m;}catch(e){}
+function applyMode(){const r=document.documentElement;r.classList.remove("nl-light","nl-dark");if(S.mode!=="auto")r.classList.add("nl-"+S.mode);}
+applyMode();
+const $=id=>document.getElementById(id);
+const t=k=>T[S.lang][k];
+const loc=()=>S.lang==="nl"?"nl-NL":"en-GB";
+const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+function amsDate(d){return new Intl.DateTimeFormat("en-CA",{timeZone:TZ,year:"numeric",month:"2-digit",day:"2-digit"}).format(d);}
+function shift(ymd,n){const d=new Date(ymd+"T12:00:00Z");d.setUTCDate(d.getUTCDate()+n);return d.toISOString().slice(0,10);}
+function fmtTime(iso){return new Intl.DateTimeFormat(loc(),{timeZone:TZ,hour:"2-digit",minute:"2-digit",hour12:false}).format(new Date(iso));}
+
+async function fetchDay(ymd){
+  const r=await fetch(API+"?dates="+ymd.replace(/-/g,""),{cache:"no-store"});
+  if(!r.ok)throw new Error("HTTP "+r.status);
+  const j=await r.json();return j.events||[];
+}
+
+async function load(dir){
+  clearTimeout(S.timer);
+  setStatus("load");
+  let day=S.day||amsDate(new Date());
+  try{
+    let ev=await fetchDay(day);
+    // Champions League plays on a few nights a month: when stepping (or on first load with nothing today), skip empty days
+    let tries=0;const step=dir||1;
+    while(!ev.length&&tries<21&&(dir||!S.day)){day=shift(day,step);ev=await fetchDay(day);tries++;}
+    S.snapshot=false;S.day=day;S.events=ev;
+  }catch(e){
+    if(!S.events.length||S.snapshot){S.snapshot=true;S.day=SNAP_DATE;S.events=SNAP;}
+    else{setStatus("err");render();return;}
+  }
+  render();
+  const live=S.events.some(e=>st(e).state==="in");
+  setStatus(S.snapshot?"snap":live?"live":"ok");
+  if(!S.snapshot)S.timer=setTimeout(()=>load(0),live?30000:180000);
+}
+
+function st(e){return (e.competitions?.[0]?.status||e.status||{type:{}}).type||{};}
+function stObj(e){return e.competitions?.[0]?.status||e.status||{};}
+function sides(e){const c=e.competitions[0].competitors;return{h:c.find(x=>x.homeAway==="home")||c[0],a:c.find(x=>x.homeAway==="away")||c[1]};}
+function isNL(e){const {h,a}=sides(e);return NL_CLUBS.test(h.team.displayName)||NL_CLUBS.test(a.team.displayName);}
+function logo(team){return team.logo||("https://a.espncdn.com/i/teamlogos/soccer/500/"+team.id+".png");}
+function crest(team){
+  const ab=esc((team.abbreviation||team.displayName||"").slice(0,4));
+  return `<span class="crest" aria-hidden="true">${S.snapshot?ab:`<img alt="" src="${esc(logo(team))}" loading="lazy" onerror="this.parentNode.textContent='${ab}'">`}</span>`;
+}
+
+function statusLabel(e){
+  const s=st(e),o=stObj(e);
+  if(s.state==="in"){
+    if(/HALF/.test(s.name))return `<span class="st live-badge">${t("ht")}</span>`;
+    return `<span class="st live-badge">${esc(o.displayClock||t("live"))}</span>`;
+  }
+  if(s.state==="post"){
+    if(/POSTPONED|CANCELED|ABANDON/.test(s.name))return `<span class="st">${t("post")}</span>`;
+    if(/PEN/.test(s.name))return `<span class="st">${t("pens")}</span>`;
+    if(/AET|EXTRA/.test(s.name))return `<span class="st">${t("aet")}</span>`;
+    return `<span class="st">${t("ft")}</span>`;
+  }
+  if(/POSTPONED/.test(s.name||""))return `<span class="st">${t("post")}</span>`;
+  return `<span class="st">${t("sched")}</span>`;
+}
+
+function teamHTML(c,side,lost){
+  const nl=NL_CLUBS.test(c.team.displayName)?`<span class="nlflag">NL</span>`:"";
+  return `<div class="team ${side}${lost?" lost":""}">${crest(c.team)}<div style="min-width:0"><div class="nm">${esc(c.team.shortDisplayName||c.team.displayName)}${nl}</div>${c.form?`<span class="form hide-sm">${esc(c.form.split("").join(" "))}</span>`:""}</div></div>`;
+}
+
+function eventsHTML(e){
+  const comp=e.competitions[0],{h}=sides(e);
+  const det=(comp.details||[]).filter(d=>d.scoringPlay||d.yellowCard||d.redCard);
+  if(!det.length)return `<p style="margin:0;color:var(--muted)">${t("noev")}</p>`;
+  return det.map(d=>{
+    const who=esc(d.athletesInvolved?.[0]?.shortName||d.athletesInvolved?.[0]?.displayName||"");
+    let icon;
+    if(d.scoringPlay)icon=`<span class="ic g" aria-label="goal">⚽</span>`;
+    else if(d.redCard)icon=`<span class="ic rd" title="${t("r")}"></span>`;
+    else icon=`<span class="ic y" title="${t("y")}"></span>`;
+    const tag=d.ownGoal?` (${t("og")})`:d.penaltyKick&&d.scoringPlay?` (${t("pen")})`:"";
+    const home=String(d.team?.id)===String(h.team.id);
+    const txt=`${home?who+tag+icon:icon+who+tag}`;
+    return `<div class="ev"><div class="l">${home?txt:""}</div><div class="min">${esc(d.clock?.displayValue||"")}</div><div class="r">${home?"":txt}</div></div>`;
+  }).join("");
+}
+
+function matchHTML(e){
+  const s=st(e),{h,a}=sides(e),comp=e.competitions[0];
+  const started=s.state!=="pre";
+  const hs=+h.score,as=+a.score,done=s.state==="post";
+  const mid=started?`<div class="score">${esc(h.score)}–${esc(a.score)}</div>${statusLabel(e)}`:`<div class="ko">${fmtTime(e.date)}</div>${statusLabel(e)}`;
+  const open=S.open.has(e.id);
+  const v=comp.venue||{};
+  const link=(e.links||[]).find(l=>/summary|gameId/.test(l.href||""))?.href;
+  return `<article class="match${isNL(e)?" nl":""}">
+    <button class="mrow" type="button" data-id="${esc(e.id)}" aria-expanded="${open}">
+      ${teamHTML(h,"home",done&&hs<as)}<div class="mid">${mid}</div>${teamHTML(a,"away",done&&as<hs)}
+    </button>
+    ${open?`<div class="detail">${started?eventsHTML(e):""}
+      <div class="meta"><span>${t("kickoff")}: ${fmtTime(e.date)}</span>${v.fullName?`<span>${t("venue")}: ${esc(v.fullName)}${v.address?.city?", "+esc(v.address.city):""}</span>`:""}${link?`<a href="${esc(link)}" target="_blank" rel="noopener">${t("espn")} ↗</a>`:""}</div>
+    </div>`:""}
+  </article>`;
+}
+
+function render(){
+  document.documentElement.lang=S.lang;
+  $("tagline").textContent=t("tag");
+  $("tab-m").textContent=t("tabM");$("tab-s").textContent=t("tabS");
+  $("nlonly").textContent=t("nlonly");$("nlonly").setAttribute("aria-pressed",S.nlOnly);
+  $("refresh").textContent=t("refresh");
+  $("lang-nl").setAttribute("aria-pressed",S.lang==="nl");$("lang-en").setAttribute("aria-pressed",S.lang==="en");
+  $("modegrp").setAttribute("aria-label",t("mGroup"));
+  [["light","mLight"],["dark","mDark"],["auto","mAuto"]].forEach(([m,k])=>{const b=$("mode-"+m);b.querySelector("span").textContent=t(k);b.setAttribute("aria-pressed",S.mode===m);});
+  $("prev").setAttribute("aria-label",S.lang==="nl"?"Vorige speeldag":"Previous matchday");
+  $("next").setAttribute("aria-label",t("nextMd"));
+  $("foot").textContent=t("foot")+" "+t("timesNL")+".";
+  if(S.day){
+    const d=new Date(S.day+"T12:00:00Z");
+    $("dayname").textContent=new Intl.DateTimeFormat(loc(),{weekday:"long",day:"numeric",month:"long",timeZone:"UTC"}).format(d);
+    const n=S.events.length;
+    $("daysub").textContent=n?`${n} ${n===1?t("matchOne"):t("match")} · ${t("timesNL")}`:"";
+  }
+  const note=$("note");note.hidden=!S.snapshot;note.textContent=t("snap");
+
+  let ev=[...S.events].sort((x,y)=>x.date.localeCompare(y.date));
+  if(S.nlOnly)ev=ev.filter(isNL);
+  const box=$("matches");
+  if(!S.day){box.innerHTML=`<div class="empty">${t("loading")}</div>`;}
+  else if(!ev.length){box.innerHTML=`<div class="empty">${S.nlOnly?t("nomatchNL"):t("nomatch")}</div>`;}
+  else{
+    let html="";
+    const nl=ev.filter(isNL),rest=ev.filter(e=>!isNL(e));
+    if(nl.length&&!S.nlOnly){html+=`<div class="group-h nl">${t("nlgroup")}</div><div class="list">${nl.map(matchHTML).join("")}</div>`;}
+    const list=S.nlOnly?nl:rest;
+    const byTime={};list.forEach(e=>{const k=fmtTime(e.date);(byTime[k]=byTime[k]||[]).push(e);});
+    Object.keys(byTime).forEach(k=>{html+=`<div class="group-h">${t("kickoff")} ${k}</div><div class="list">${byTime[k].map(matchHTML).join("")}</div>`;});
+    box.innerHTML=html;
+  }
+  if(S.tab==="s")renderStandings();
+}
+
+function setStatus(k){
+  const dot=$("dot"),tx=$("stxt");dot.className="dot";
+  const now=new Intl.DateTimeFormat(loc(),{timeZone:TZ,hour:"2-digit",minute:"2-digit"}).format(new Date());
+  if(k==="load"){tx.textContent=t("connecting");}
+  else if(k==="ok"){dot.classList.add("ok");tx.textContent=`${t("updated")} ${now}`;}
+  else if(k==="live"){dot.classList.add("live");tx.textContent=`${t("live")} · ${t("updated")} ${now}`;}
+  else if(k==="snap"){tx.textContent=S.lang==="nl"?"Voorbeeld":"Preview";}
+  else if(k==="err"){tx.textContent=t("err");}
+  S.lastStatus=k;
+}
+
+async function loadStandings(){
+  if(S.standings)return renderStandings();
+  $("standings").innerHTML=`<div class="empty">${t("loading")}</div>`;
+  try{
+    const r=await fetch(STAND,{cache:"no-store"});if(!r.ok)throw 0;
+    const j=await r.json();
+    const entries=(j.children?.[0]?.standings?.entries)||(j.standings?.entries)||[];
+    if(!entries.length)throw 0;
+    S.standings=entries.map(en=>{
+      const g=n=>{const s=(en.stats||[]).find(x=>x.name===n||x.type===n);return s?(s.value??+s.displayValue):0;};
+      return{team:en.team,rank:g("rank"),gp:g("gamesPlayed"),w:g("wins"),d:g("ties"),l:g("losses"),gd:g("pointDifferential"),pts:g("points")};
+    }).sort((a,b)=>(a.rank||99)-(b.rank||99)||b.pts-a.pts);
+    S.standingsFail=false;
+  }catch(e){S.standingsFail=true;}
+  renderStandings();
+}
+
+function renderStandings(){
+  const sn=$("snote");
+  if(S.standingsFail||!S.standings){
+    sn.hidden=!S.standingsFail;sn.textContent=t("snapS");
+    if(S.standingsFail)$("standings").innerHTML="";
+    return;
+  }
+  sn.hidden=true;
+  const rows=S.standings.map((r,i)=>{
+    const pos=r.rank||i+1,z=pos<=8?"z1":pos<=24?"z2":"z3";
+    const nl=NL_CLUBS.test(r.team.displayName);
+    const team={...r.team,logo:r.team.logos?.[0]?.href};
+    return `<tr class="${z}${nl?" nl":""}"><td class="pos">${pos}</td><td class="t">${crest(team)}<span>${esc(r.team.shortDisplayName||r.team.displayName)}</span>${nl?`<span class="nlflag">NL</span>`:""}</td><td>${r.gp}</td><td>${r.w}</td><td>${r.d}</td><td>${r.l}</td><td>${r.gd>0?"+":""}${r.gd}</td><td class="pts">${r.pts}</td></tr>`;
+  }).join("");
+  $("standings").innerHTML=`<div class="tbl-wrap"><table><thead><tr><th>${t("pos")}</th><th class="t">${t("club")}</th><th>${t("gp")}</th><th>${t("w")}</th><th>${t("d")}</th><th>${t("l")}</th><th>${t("gd")}</th><th>${t("pts")}</th></tr></thead><tbody>${rows}</tbody></table></div>
+  <div class="legend"><span><i style="background:var(--zone-top)"></i>${t("z1")}</span><span><i style="background:var(--zone-mid)"></i>${t("z2")}</span><span><i style="background:var(--zone-out)"></i>${t("z3")}</span></div>`;
+}
+
+function setLang(l){S.lang=l;try{localStorage.setItem("clsw-lang",l);}catch(e){}render();setStatus(S.lastStatus||"ok");}
+function setTab(k){S.tab=k;$("tab-m").setAttribute("aria-selected",k==="m");$("tab-s").setAttribute("aria-selected",k==="s");$("view-m").hidden=k!=="m";$("view-s").hidden=k!=="s";if(k==="s")loadStandings();}
+
+$("lang-nl").onclick=()=>setLang("nl");$("lang-en").onclick=()=>setLang("en");
+["light","dark","auto"].forEach(m=>{$("mode-"+m).onclick=()=>{S.mode=m;try{localStorage.setItem("clsw-mode",m);}catch(e){}applyMode();render();setStatus(S.lastStatus||"ok");};});
+$("tab-m").onclick=()=>setTab("m");$("tab-s").onclick=()=>setTab("s");
+$("refresh").onclick=()=>{S.standings=null;load(0);if(S.tab==="s")loadStandings();};
+$("nlonly").onclick=()=>{S.nlOnly=!S.nlOnly;try{localStorage.setItem("clsw-nl",S.nlOnly?"1":"0");}catch(e){}render();};
+$("prev").onclick=()=>{if(S.snapshot)return;S.day=shift(S.day,-1);S.open.clear();load(-1);};
+$("next").onclick=()=>{if(S.snapshot)return;S.day=shift(S.day,1);S.open.clear();load(1);};
+$("matches").addEventListener("click",ev=>{const b=ev.target.closest(".mrow");if(!b)return;const id=b.dataset.id;S.open.has(id)?S.open.delete(id):S.open.add(id);render();});
+
+render();load(0);
+})();
+</script>
+</body>
+</html>
